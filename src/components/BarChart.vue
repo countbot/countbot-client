@@ -269,45 +269,6 @@ export default {
     min-height: 2000px;
   }
 
-  #body {
-    position: relative;
-  }
-
-  footer {
-    padding: 2em 0 1em 0;
-    font-size: 12px;
-  }
-
-  h1 {
-    font-size: 96px;
-    margin-top: .3em;
-    margin-bottom: 0;
-  }
-
-  h1 + h2 {
-    margin-top: 0;
-  }
-
-  h2 {
-    font-weight: 400;
-    font-size: 28px;
-  }
-
-  h1, h2 {
-    font-family: 'Yanone Kaffeesatz';
-    text-rendering: optimizeLegibility;
-  }
-
-  #body > p {
-    line-height: 1.5em;
-    width: 640px;
-    text-rendering: optimizeLegibility;
-  }
-
-  #charts {
-    padding: 10px 0;
-  }
-
   .chart {
     display: inline-block;
     position: relative;
@@ -316,13 +277,6 @@ export default {
     overflow: hidden;
     padding-top: 1em;
     padding-bottom: 1em;
-  }
-
-  svg {
-    /*display: inline-block;*/
-    /*position: absolute;*/
-    /*top: 0;*/
-    /*left: 0;*/
   }
 
   .reset {
@@ -350,12 +304,5 @@ export default {
   .chart >>> .selection {
     stroke: #bbb;
     stroke-opacity: .3;
-  }
-
-  aside {
-    position: absolute;
-    left: 740px;
-    font-size: smaller;
-    width: 220px;
   }
 </style>
