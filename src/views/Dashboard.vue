@@ -2,11 +2,14 @@
   <div class='dashboard container-fluid'>
     <div class='row'>
       <div class='col text-center'>
-        <h1>Werewolves Dashboard</h1>
+        <h1>Countbot Dashboard</h1>
         <p v-if='cf.cf.groupAll().value() === cf.cf.size()'>{{ cf.cf.size() }} messages</p>
         <p v-else>{{ cf.cf.groupAll().value() }} of {{ cf.cf.size() }} messages selected</p>
-          <!--<h3>Total : {{ cf.cf.groupAll().value() }} messages-->
-          <!--  {{ queryText ? "containing \"" + queryText + "\"": "" }}</h3>-->
+        <button type='button'
+          class='btn btn-sm btn-secondary float-right'
+          @click='sort = !sort'>
+            Sort Users
+        </button>
       </div>
     </div>
     <div  v-if='cf.count-1' class='text-center row'>
@@ -89,6 +92,7 @@ export default {
     return {
       queryText: '',
       windowWidth: window.innerWidth,
+      sort: false,
     };
   },
   computed: {
@@ -109,8 +113,9 @@ export default {
       return d3.timeDay.round;
     },
     userScale() {
+      const c = this.cf.count; // Used to force recalulation
       return d3.scaleBand()
-        .domain(this.cf.userGroup.top(Infinity).map(d => d.key).sort())
+        .domain(this.sort ? this.cf.userGroup.top(Infinity).map(d => d.key) : this.cf.userGroup.top(Infinity).map(d => d.key).sort())
         .padding(0.1);
     },
   },

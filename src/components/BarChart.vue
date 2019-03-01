@@ -140,6 +140,7 @@ export default {
     resetY() {
       d3.select(`#${this.chartId}`).select('.y-axis').selectAll('g').remove();
       d3.select(`#${this.chartId}`).select('.y-axis').call(d3.axisLeft(this.y).ticks(4)).call(g => g.select('.domain').remove());
+      d3.select(`#${this.chartId}`).select('.x-axis').call(d3.axisBottom(this.x).ticks(this.ticks));
     },
     initializeChart() {
       const self = this;
@@ -253,6 +254,9 @@ export default {
   watch: {
     count() {
       this.resetY();
+    },
+    xScale() {
+      d3.select(`#${this.chartId}`).select('.x-axis').call(d3.axisBottom(this.x).ticks(this.ticks));
     },
   },
 };
