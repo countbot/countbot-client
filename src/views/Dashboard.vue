@@ -2,7 +2,7 @@
   <div class='dashboard container-fluid'>
     <div class='row'>
       <div class='col text-center'>
-        <h1>Countbot Dashboard</h1>
+        <h1>Werewolves Dashboard</h1>
         <p v-if='cf.cf.groupAll().value() === cf.cf.size()'>{{ cf.cf.size() }} messages</p>
         <p v-else>{{ cf.cf.groupAll().value() }} of {{ cf.cf.size() }} messages selected</p>
         <button type='button'
