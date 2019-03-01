@@ -8,7 +8,7 @@ export default new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-      path: '/dashboard',
+      path: '/',
       name: 'dashboard',
       component: () => import(/* webpackChunkName: "dashboard" */ './views/Dashboard.vue'),
     },
