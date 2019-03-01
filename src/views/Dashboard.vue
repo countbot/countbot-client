@@ -154,7 +154,7 @@ export default {
         console.error(e);
       }
     },
-    handleResize(event) {
+    handleResize() {
       this.windowWidth = window.innerWidth;
     },
   },

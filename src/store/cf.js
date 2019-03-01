@@ -59,7 +59,7 @@ const mutations = {
     // eslint-disable-next-line arrow-body-style
     state.cf[payload.dim].filterAll();
     state.cf.count += 1;
-  }
+  },
 };
 const actions = {
   SET_CF: (context, payload) => context.commit('SET_CF', payload),

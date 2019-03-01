@@ -16,5 +16,5 @@ export default new Vuex.Store({
     cf,
   },
 
-  strict: process.env.NODE_ENV !== 'production',
+  strict: process.env.NODE_ENV !== 'production', // Turn off strict mode in production to avoid performance cost
 });
