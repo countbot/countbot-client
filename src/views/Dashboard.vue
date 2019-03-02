@@ -22,8 +22,6 @@
                 dimension='hourDim'
                 group='hourGroup'
                 :barWidthMult='.75'
-                :height='((windowWidth - 10) * 3 / 8 - 90) / 4'
-                :width='(windowWidth - 10) * 3 / 8 - 90'
             />
           </div>
           <div class='col-sm'>
@@ -36,8 +34,6 @@
                 :brushEnabled='false'
                 :labelRotate='true'
                 :margin='{ top: 10, right: 20, bottom: 80, left: 40 }'
-                :height='((windowWidth - 10) * 3 / 8 - 90) / 4'
-                :width='(windowWidth - 10) * 3 / 8 - 90'
             />
           </div>
         </div>
@@ -50,9 +46,7 @@
                 group='dateGroup'
                 :xScale='dateScale'
                 :round='dateRound'
-                :height='((windowWidth - 10) * 3 / 4 - 90) / 8'
-                :width='(windowWidth - 10) * 3 / 4 - 90'
-                :key='windowWidth'
+                :aspectRatio='0.125'
             />
           </div>
         </div>
@@ -91,7 +85,6 @@ export default {
   data() {
     return {
       queryText: '',
-      windowWidth: window.innerWidth,
       sort: false,
     };
   },
@@ -113,9 +106,11 @@ export default {
       return d3.timeDay.round;
     },
     userScale() {
+      // eslint-disable-next-line no-unused-vars
       const c = this.cf.count; // Used to force recalulation
       return d3.scaleBand()
-        .domain(this.sort ? this.cf.userGroup.top(Infinity).map(d => d.key) : this.cf.userGroup.top(Infinity).map(d => d.key).sort())
+        .domain(this.sort ? this.cf.userGroup.top(Infinity).map(d => d.key)
+          : this.cf.userGroup.top(Infinity).map(d => d.key).sort())
         .padding(0.1);
     },
   },
@@ -158,9 +153,6 @@ export default {
       } catch (e) {
         console.error(e);
       }
-    },
-    handleResize() {
-      this.windowWidth = window.innerWidth;
     },
   },
 };
