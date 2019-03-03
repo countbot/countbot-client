@@ -26,8 +26,8 @@ const mutations = {
     state.cf.userGroup = state.cf.userDim.group();
     state.cf.textDim = state.cf.cf.dimension(d => d.te);
     state.cf.dateDim = state.cf.cf.dimension(d => d.ti);
-    state.cf.dateGroup = state.cf.dateDim.group(d => d.startOf('day'));
-    state.cf.hourDim = state.cf.cf.dimension(d => d.ti.hour() + d.ti.minute() / 60);
+    state.cf.dateGroup = state.cf.dateDim.group(d => d.setHours(0, 0, 0, 0));
+    state.cf.hourDim = state.cf.cf.dimension(d => d.ti.getHours() + d.ti.getMinutes() / 60);
     state.cf.hourGroup = state.cf.hourDim.group(Math.floor);
     state.cf.count += 1;
   },

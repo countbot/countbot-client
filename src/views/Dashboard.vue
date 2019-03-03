@@ -88,8 +88,6 @@
 
 <script>
 import dataStore from '@/services/dataStore';
-// import crossfilter from 'crossfilter2';
-import moment from 'moment';
 import * as d3 from 'd3';
 import BarChart from '@/components/BarChart.vue';
 import UserList from '@/components/UserList.vue';
@@ -112,10 +110,13 @@ export default {
       return this.$store.getters.CF;
     },
     startDate() {
-      return this.cf.dateDim.bottom(1)[0].ti.startOf('day');
+      return this.cf.dateDim.bottom(1)[0].ti.setHours(0, 0, 0, 0);
     },
     endDate() {
-      return this.cf.dateDim.top(1)[0].ti.add(1, 'days').startOf('day');
+      const d = this.cf.dateDim.top(1)[0].ti;
+      d.setDate(d.getDate() + 1);
+      d.setHours(0, 0, 0, 0);
+      return d;
     },
     dateScale() {
       return d3.scaleTime()
@@ -158,10 +159,10 @@ export default {
         let { p } = response.data.data.Group[0];
         p = p.map((_post) => {
           const post = Object.assign({}, _post);
-          post.ti = moment(post.ti.f.split('[')[0]);
+          post.ti = new Date(post.ti.f);
           return post;
         });
-        p.sort((a, b) => a.ti - b.ti);
+        // p.sort((a, b) => a.ti - b.ti);
         this.$store.dispatch('ADD_RECORDS', p);
         if (p.length === count) {
           offset += count;
