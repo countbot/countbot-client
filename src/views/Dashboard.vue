@@ -24,16 +24,21 @@
     >
       <div class="col-md-9">
         <div class="row">
-          <div class="col-md">
+          <div class="col-lg">
             <BarChart
               chart-id="hour-chart"
               title="Time Of Day"
               dimension="hourDim"
               group="hourGroup"
               :bar-width-mult=".75"
+              :aspect-ratio="$mq | mq({
+                sm: 0.25,
+                md: 0.125,
+                lg: 0.25,
+              })"
             />
           </div>
-          <div class="col-md">
+          <div class="col-lg">
             <BarChart
               chart-id="user-chart"
               title="User"
@@ -43,6 +48,11 @@
               :brush-enabled="false"
               :label-rotate="true"
               :margin="{ top: 10, right: 20, bottom: 80, left: 40 }"
+              :aspect-ratio="$mq | mq({
+                sm: 0.25,
+                md: 0.125,
+                lg: 0.25,
+              })"
             />
           </div>
         </div>
