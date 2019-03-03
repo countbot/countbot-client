@@ -3,6 +3,10 @@ import Router from 'vue-router';
 
 Vue.use(Router);
 
+function loadView(view) {
+  return () => import(/* webpackChunkName: 'view-[request]' */ `@/views/${view}.vue`);
+}
+
 export default new Router({
   mode: 'history',
   base: process.env.BASE_URL,
@@ -10,7 +14,7 @@ export default new Router({
     {
       path: '/dashboard',
       name: 'dashboard',
-      component: () => import(/* webpackChunkName: "dashboard" */ './views/Dashboard.vue'),
+      component: loadView('Dashboard'),
     },
   ],
 });

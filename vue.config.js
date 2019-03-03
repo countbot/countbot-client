@@ -29,7 +29,10 @@ module.exports = {
   devServer: {
     disableHostCheck: true,
   },
+
   configureWebpack: {
     plugins,
   },
+
+  lintOnSave: undefined,
 };
