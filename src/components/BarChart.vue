@@ -1,29 +1,47 @@
 <!-- client/src/components/BarChart.vue -->
 
 <template>
-  <div :id=chartId class='chart'>
-    <div class='title'>{{ title }}<a class='reset' style='display: none' @click='reset'>reset</a>
+  <div
+    :id="chartId"
+    class="chart"
+  >
+    <div class="title">
+      {{ title }}<a
+        class="reset"
+        style="display: none"
+        @click="reset"
+      >reset</a>
     </div>
-    <svg :height='this.height + this.margin.top + this.margin.bottom'>
-      <g :transform='transform(margin.left, margin.top)'>
-        <g class='bars' :key=cf.count>
-        <rect v-for='g in gr.all()'
-          :key='typeof g.key === (String || Number) ? g.key : g.key._i'
-          :x=x(g.key)
-          :y=y(g.value)
-          :height='y(0) - y(g.value)'
-          :width='width/gr.all().length*barWidthMult'
-          :class='{ background: brushEnabled ?
-            !(activeRange[0] <= x(g.key) && x(g.key) < activeRange[1])
-            : !(filterArray.indexOf(g.key)+1 ?
-            filterArray.length
-            : !filterArray.length) }'
-          @click='toggleFiltered(g)'
+    <svg :height="height + margin.top + margin.bottom">
+      <g :transform="transform(margin.left, margin.top)">
+        <g
+          :key="cf.count"
+          class="bars"
+        >
+          <rect
+            v-for="g in gr.all()"
+            :key="typeof g.key === (String || Number) ? g.key : g.key._i"
+            :x="x(g.key)"
+            :y="y(g.value)"
+            :height="y(0) - y(g.value)"
+            :width="width/gr.all().length*barWidthMult"
+            :class="{ background: brushEnabled ?
+              !(activeRange[0] <= x(g.key) && x(g.key) < activeRange[1])
+              : !(filterArray.indexOf(g.key)+1 ?
+                filterArray.length
+                : !filterArray.length) }"
+            @click="toggleFiltered(g)"
           />
         </g>
-        <g class='x-axis' :transform='transform(0, height)'></g>
-        <g class='y-axis' :transform='transform(0, 0)'></g>
-        <g class='brush'></g>
+        <g
+          class="x-axis"
+          :transform="transform(0, height)"
+        />
+        <g
+          class="y-axis"
+          :transform="transform(0, 0)"
+        />
+        <g class="brush" />
       </g>
     </svg>
   </div>
@@ -34,6 +52,61 @@ import * as d3 from 'd3';
 
 export default {
   name: 'BarChart',
+  props: {
+    chartId: {
+      type: String,
+      default: 'bar-chart',
+    },
+    title: {
+      type: String,
+      default: 'Bar Chart',
+    },
+    dimension: {
+      type: String,
+      required: true,
+    },
+    group: {
+      type: String,
+      required: true,
+    },
+    margin: {
+      type: Object,
+      default: () => ({
+        top: 10,
+        right: 20,
+        bottom: 20,
+        left: 40,
+      }),
+    },
+    aspectRatio: {
+      type: Number,
+      default: 0.25,
+    },
+    barWidthMult: {
+      type: Number,
+      default: 0.9,
+    },
+    xScale: {
+      type: Function,
+      default: d3.scaleLinear().domain([0, 24]),
+    },
+    ticks: {
+      type: Number,
+      default: null,
+    },
+    round: {
+      type: Function,
+      default: Math.round,
+    },
+    brushEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    labelRotate: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       activeRange: [0, 1],
@@ -72,53 +145,12 @@ export default {
       return this.width * this.aspectRatio;
     },
   },
-  props: {
-    chartId: {
-      type: String,
-      default: () => 'bar-chart',
+  watch: {
+    count() {
+      this.refreshAxes();
     },
-    title: {
-      type: String,
-      default: () => 'Bar Chart',
-    },
-    dimension: String,
-    group: String,
-    margin: {
-      type: Object,
-      default: () => ({
-        top: 10,
-        right: 20,
-        bottom: 20,
-        left: 40,
-      }),
-    },
-    aspectRatio: {
-      type: Number,
-      default: () => 0.25,
-    },
-    barWidthMult: {
-      type: Number,
-      default: () => 0.9,
-    },
-    xScale: {
-      type: Function,
-      default: d3.scaleLinear().domain([0, 24]),
-    },
-    ticks: {
-      type: Number,
-      default: () => null,
-    },
-    round: {
-      type: Function,
-      default: Math.round,
-    },
-    brushEnabled: {
-      type: Boolean,
-      default: true,
-    },
-    labelRotate: {
-      type: Boolean,
-      default: false,
+    xScale() {
+      d3.select(`#${this.chartId}`).select('.x-axis').call(d3.axisBottom(this.x).ticks(this.ticks));
     },
   },
   // created() {
@@ -284,7 +316,6 @@ export default {
         .attr('transform', (d, i) => `translate(${this.activeRange[i]}, 0)`);
     },
     reset() {
-      console.log('reset!');
       this.$store.dispatch('CLEAR_FILTER', { dim: this.dimension });
       d3.select(`#${this.chartId}`).select('.reset').style('display', 'none');
       if (this.brushEnabled) {
@@ -312,14 +343,6 @@ export default {
         this.filterArray.push(g.key);
       }
       this.$store.dispatch('FILTER_ARRAY', { dim: this.dimension, filter: this.filterArray });
-    },
-  },
-  watch: {
-    count() {
-      this.refreshAxes();
-    },
-    xScale() {
-      d3.select(`#${this.chartId}`).select('.x-axis').call(d3.axisBottom(this.x).ticks(this.ticks));
     },
   },
 };

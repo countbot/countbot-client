@@ -1,67 +1,89 @@
 <template>
-  <div class='dashboard container-fluid'>
-    <div class='row'>
-      <div class='col text-center'>
+  <div class="dashboard container-fluid">
+    <div class="row">
+      <div class="col text-center">
         <h1>Werewolves Dashboard</h1>
-        <p v-if='cf.cf.groupAll().value() === cf.cf.size()'>{{ cf.cf.size() }} messages</p>
-        <p v-else>{{ cf.cf.groupAll().value() }} of {{ cf.cf.size() }} messages selected</p>
-        <button type='button'
-          class='btn btn-sm btn-secondary float-right'
-          @click='sort = !sort'>
-            Sort Users
+        <p v-if="cf.cf.groupAll().value() === cf.cf.size()">
+          {{ cf.cf.size() }} messages
+        </p>
+        <p v-else>
+          {{ cf.cf.groupAll().value() }} of {{ cf.cf.size() }} messages selected
+        </p>
+        <button
+          type="button"
+          class="btn btn-sm btn-secondary float-right"
+          @click="sort = !sort"
+        >
+          Sort Users
         </button>
       </div>
     </div>
-    <div  v-if='cf.count-1' class='text-center row'>
-      <div class='col-md-9'>
-        <div class='row'>
-          <div class='col-sm'>
+    <div
+      v-if="cf.count-1"
+      class="text-center row"
+    >
+      <div class="col-md-9">
+        <div class="row">
+          <div class="col-md">
             <BarChart
-                chartId='hour-chart'
-                title='Time Of Day'
-                dimension='hourDim'
-                group='hourGroup'
-                :barWidthMult='.75'
+              chart-id="hour-chart"
+              title="Time Of Day"
+              dimension="hourDim"
+              group="hourGroup"
+              :bar-width-mult=".75"
             />
           </div>
-          <div class='col-sm'>
+          <div class="col-md">
             <BarChart
-                chartId='user-chart'
-                title='User'
-                dimension='userDim'
-                group='userGroup'
-                :xScale='userScale'
-                :brushEnabled='false'
-                :labelRotate='true'
-                :margin='{ top: 10, right: 20, bottom: 80, left: 40 }'
+              chart-id="user-chart"
+              title="User"
+              dimension="userDim"
+              group="userGroup"
+              :x-scale="userScale"
+              :brush-enabled="false"
+              :label-rotate="true"
+              :margin="{ top: 10, right: 20, bottom: 80, left: 40 }"
             />
           </div>
         </div>
-        <div class='row'>
-          <div class='col'>
+        <div class="row">
+          <div class="col">
             <BarChart
-                chartId='date-chart'
-                title='Date'
-                dimension='dateDim'
-                group='dateGroup'
-                :xScale='dateScale'
-                :round='dateRound'
-                :aspectRatio='0.125'
+              chart-id="date-chart"
+              title="Date"
+              dimension="dateDim"
+              group="dateGroup"
+              :x-scale="dateScale"
+              :round="dateRound"
+              :aspect-ratio="$mq | mq({
+                sm: 0.25,
+                md: 0.125,
+              })"
             />
           </div>
         </div>
       </div>
-      <div class='col-md-3 text-center'>
-        <div class='textfilter'>
-          <div class='title'>Text Filter</div>
+      <div class="col-md-3 text-center">
+        <div class="textfilter">
+          <div class="title">
+            Text Filter
+          </div>
           <div>
-            <input type='text' name='textFilter' v-model='queryText' @input='filter("textDim")' />
+            <input
+              v-model="queryText"
+              type="text"
+              name="textFilter"
+              @input="filter(&quot;textDim&quot;)"
+            >
           </div>
         </div>
-        <UserList title='User List'/>
+        <UserList title="User List" />
       </div>
     </div>
-    <div v-else class='text-center'>
+    <div
+      v-else
+      class="text-center"
+    >
       <h2>Loading...</h2>
     </div>
   </div>
@@ -69,8 +91,6 @@
 
 <script>
 import dataStore from '@/services/dataStore';
-// import crossfilter from 'crossfilter2';
-import moment from 'moment';
 import * as d3 from 'd3';
 import BarChart from '@/components/BarChart.vue';
 import UserList from '@/components/UserList.vue';
@@ -93,10 +113,13 @@ export default {
       return this.$store.getters.CF;
     },
     startDate() {
-      return this.cf.dateDim.bottom(1)[0].ti.startOf('day');
+      return this.cf.dateDim.bottom(1)[0].ti.setHours(0, 0, 0, 0);
     },
     endDate() {
-      return this.cf.dateDim.top(1)[0].ti.add(1, 'days').startOf('day');
+      const d = this.cf.dateDim.top(1)[0].ti;
+      d.setDate(d.getDate() + 1);
+      d.setHours(0, 0, 0, 0);
+      return d;
     },
     dateScale() {
       return d3.scaleTime()
@@ -139,10 +162,10 @@ export default {
         let { p } = response.data.data.Group[0];
         p = p.map((_post) => {
           const post = Object.assign({}, _post);
-          post.ti = moment(post.ti.f.split('[')[0]);
+          post.ti = new Date(post.ti.f);
           return post;
         });
-        p.sort((a, b) => a.ti - b.ti);
+        // p.sort((a, b) => a.ti - b.ti);
         this.$store.dispatch('ADD_RECORDS', p);
         if (p.length === count) {
           offset += count;

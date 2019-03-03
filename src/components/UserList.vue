@@ -1,28 +1,47 @@
 <!-- client/src/components/UserList.vue -->
 
 <template>
-  <div class='list'>
+  <div class="list">
     <!--<div class='title'>{{ title }}
       <a href='#' class='reset' style='display: none' @click='reset'>reset</a>-->
     <!--</div>-->
-      <ul id='mList' class='scrollbar' :key='cf.count'>
-        <li v-for='u in cf.dateDim.top(100,pageNumber*100)' :key='u.key'>
-          <span v-if='u.te'><b>{{ u.p.n }}:</b> {{ u.te }}</span>
-        </li>
-      </ul>
-      <div class='small'>
-        {{ pageNumber*100+1 }} to {{ (pageNumber+1)*100 }} of {{ cf.cf.groupAll().value() }}
-      </div>
-      <div>
-        <a class='pagebutton' @click='prevPage'>prev</a> /
-        <a class='pagebutton' @click='nextPage'>next</a>
-      </div>
+    <ul
+      id="mList"
+      :key="cf.count"
+      class="scrollbar"
+    >
+      <li
+        v-for="u in cf.dateDim.top(100,pageNumber*100)"
+        :key="u.key"
+      >
+        <span v-if="u.te"><b>{{ u.p.n }}:</b> {{ u.te }}</span>
+      </li>
+    </ul>
+    <div class="small">
+      {{ pageNumber*100+1 }} to {{ (pageNumber+1)*100 }} of {{ cf.cf.groupAll().value() }}
+    </div>
+    <div>
+      <a
+        class="pagebutton"
+        @click="prevPage"
+      >prev</a> /
+      <a
+        class="pagebutton"
+        @click="nextPage"
+      >next</a>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
   name: 'UserList',
+  props: {
+    title: {
+      type: String,
+      default: 'User List',
+    },
+  },
   data() {
     return {
       pageNumber: 0,
@@ -31,12 +50,6 @@ export default {
   computed: {
     cf() {
       return this.$store.getters.CF;
-    },
-  },
-  props: {
-    title: {
-      type: String,
-      default: () => 'User List',
     },
   },
   methods: {

@@ -13,10 +13,6 @@ export default {
               i: id
               n: name
             }
-            l: liked_by {
-              i: id
-              n: name
-            }
             ti: timestamp {
               f: formatted
             }
