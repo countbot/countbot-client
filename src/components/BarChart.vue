@@ -316,7 +316,6 @@ export default {
         .attr('transform', (d, i) => `translate(${this.activeRange[i]}, 0)`);
     },
     reset() {
-      console.log('reset!');
       this.$store.dispatch('CLEAR_FILTER', { dim: this.dimension });
       d3.select(`#${this.chartId}`).select('.reset').style('display', 'none');
       if (this.brushEnabled) {

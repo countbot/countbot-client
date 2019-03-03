@@ -24,7 +24,7 @@
     >
       <div class="col-md-9">
         <div class="row">
-          <div class="col-sm">
+          <div class="col-md">
             <BarChart
               chart-id="hour-chart"
               title="Time Of Day"
@@ -33,7 +33,7 @@
               :bar-width-mult=".75"
             />
           </div>
-          <div class="col-sm">
+          <div class="col-md">
             <BarChart
               chart-id="user-chart"
               title="User"
@@ -55,7 +55,10 @@
               group="dateGroup"
               :x-scale="dateScale"
               :round="dateRound"
-              :aspect-ratio="0.125"
+              :aspect-ratio="$mq | mq({
+                sm: 0.25,
+                md: 0.125,
+              })"
             />
           </div>
         </div>
