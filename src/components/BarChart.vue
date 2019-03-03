@@ -106,6 +106,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    yAxis: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
@@ -180,9 +184,11 @@ export default {
       return `translate(${x}, ${y})`;
     },
     refreshAxes() {
-      d3.select(`#${this.chartId}`).select('.y-axis').selectAll('g').remove();
+      if (this.yAxis) {
+        d3.select(`#${this.chartId}`).select('.y-axis').selectAll('g').remove();
+        d3.select(`#${this.chartId}`).select('.y-axis').call(d3.axisLeft(this.y).ticks(4)).call(g => g.select('.domain').remove());
+      }
       d3.select(`#${this.chartId}`).select('.x-axis').selectAll('g').remove();
-      d3.select(`#${this.chartId}`).select('.y-axis').call(d3.axisLeft(this.y).ticks(4)).call(g => g.select('.domain').remove());
       const xAxis = d3.select(`#${this.chartId}`).select('.x-axis').call(d3.axisBottom(this.x).ticks(this.ticks));
       if (this.labelRotate) {
         xAxis.selectAll('text')
@@ -224,7 +230,6 @@ export default {
         extents = extents.map(this.x);
         this.activeRange = extents;
         if (extents[0] === this.x.range()[0] && extents[1] === this.x.range()[1]) {
-          console.log('match');
           br.call(this.brush.move, null);
           br.selectAll('.brush-handle')
             .style('display', 'none');
@@ -253,8 +258,10 @@ export default {
           .attr('dy', '.15em')
           .attr('transform', 'rotate(-65)');
       }
-      d3.select(`#${this.chartId}`).select('.y-axis').selectAll('g').remove();
-      d3.select(`#${this.chartId}`).select('.y-axis').call(d3.axisLeft(this.y).ticks(4)).call(g => g.select('.domain').remove());
+      if (this.yAxis) {
+        d3.select(`#${this.chartId}`).select('.y-axis').selectAll('g').remove();
+        d3.select(`#${this.chartId}`).select('.y-axis').call(d3.axisLeft(this.y).ticks(4)).call(g => g.select('.domain').remove());
+      }
       if (this.brushEnabled) {
         d3.select(`#${this.chartId}`).select('.brush')
           .call(this.brush)
