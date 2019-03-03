@@ -224,7 +224,6 @@ export default {
         extents = extents.map(this.x);
         this.activeRange = extents;
         if (extents[0] === this.x.range()[0] && extents[1] === this.x.range()[1]) {
-          console.log('match');
           br.call(this.brush.move, null);
           br.selectAll('.brush-handle')
             .style('display', 'none');
