@@ -21,7 +21,7 @@
           <rect
             v-for="g in gr.all()"
             :key="typeof g.key === (String || Number) ? g.key : g.key._i"
-            :x="x(g.key)"
+            :x="anim ? xVal[g.key] : x(g.key)"
             :y="y(g.value)"
             :height="y(0) - y(g.value)"
             :width="width/gr.all().length*barWidthMult"
@@ -49,6 +49,7 @@
 
 <script>
 import * as d3 from 'd3';
+import { TweenLite } from 'gsap/TweenLite';
 
 export default {
   name: 'BarChart',
@@ -116,6 +117,8 @@ export default {
       activeRange: [0, 1],
       filterArray: [],
       width: null,
+      xVal: null,
+      anim: false,
     };
   },
   computed: {
@@ -154,7 +157,20 @@ export default {
       this.refreshAxes();
     },
     xScale() {
-      d3.select(`#${this.chartId}`).select('.x-axis').call(d3.axisBottom(this.x).ticks(this.ticks));
+      this.anim = true;
+      let l = Object.keys(this.xVal).length - 1;
+      Object.keys(this.xVal).forEach((e) => {
+        TweenLite.to(this.xVal, 1, { [e]: this.x(e), onComplete: () => {
+          if (l) {
+            l -= 1;
+          } else {
+            this.anim = false;
+          }
+        }
+        });
+      });
+      d3.select(`#${this.chartId}`).select('.x-axis').transition().duration(1000)
+        .call(d3.axisBottom(this.x).ticks(this.ticks));
     },
   },
   // created() {
@@ -165,6 +181,11 @@ export default {
     // console.log(this.chart.dimension().top(4));
     this.width = this.$el.clientWidth - this.margin.left - this.margin.right;
     this.activeRange = [0, this.width];
+    const obj = {};
+    this.gr.all().forEach((g) => {
+      obj[g.key] = this.x(g.key);
+    });
+    this.xVal = obj;
     this.$nextTick(() => {
       window.addEventListener('resize', this.refreshChart);
     });
@@ -210,6 +231,11 @@ export default {
 
       let extents = this.brushEnabled ? this.activeRange.map(this.x.invert) : null;
       this.width = this.$el.clientWidth - this.margin.left - this.margin.right;
+      const obj = {};
+      this.gr.all().forEach((g) => {
+        obj[g.key] = this.x(g.key);
+      });
+      this.xVal = obj;
       this.refreshAxes();
       if (this.brushEnabled) {
         this.brush.extent([[0, 0], [this.x.range()[1], this.y.range()[0]]]);
