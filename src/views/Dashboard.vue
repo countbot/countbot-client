@@ -12,7 +12,14 @@
         <button
           type="button"
           class="btn btn-sm btn-secondary float-right"
-          @click="sort = !sort"
+          @click="sortGames = !sortGames"
+        >
+          Sort Games
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm btn-secondary float-right"
+          @click="sortUsers = !sortUsers"
         >
           Sort Users
         </button>
@@ -45,6 +52,42 @@
               dimension="userDim"
               group="userGroup"
               :x-scale="userScale"
+              :brush-enabled="false"
+              :label-rotate="true"
+              :margin="{ top: 10, right: 20, bottom: 80, left: 40 }"
+              :aspect-ratio="$mq | mq({
+                sm: 0.25,
+                md: 0.125,
+                lg: 0.25,
+              })"
+            />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg">
+            <BarChart
+              chart-id="game-chart"
+              title="Theme"
+              dimension="gameDim"
+              group="gameGroup"
+              :x-scale="gameScale"
+              :brush-enabled="false"
+              :label-rotate="true"
+              :margin="{ top: 10, right: 20, bottom: 80, left: 40 }"
+              :aspect-ratio="$mq | mq({
+                sm: 0.25,
+                md: 0.125,
+                lg: 0.25,
+              })"
+            />
+          </div>
+          <div class="col-lg">
+            <BarChart
+              chart-id="role-chart"
+              title="Role"
+              dimension="roleDim"
+              group="roleGroup"
+              :x-scale="roleScale"
               :brush-enabled="false"
               :label-rotate="true"
               :margin="{ top: 10, right: 20, bottom: 80, left: 40 }"
@@ -119,7 +162,8 @@ export default {
   data() {
     return {
       queryText: '',
-      sort: false,
+      sortUsers: false,
+      sortGames: false,
     };
   },
   computed: {
@@ -146,8 +190,23 @@ export default {
       // eslint-disable-next-line no-unused-vars
       const c = this.cf.count; // Used to force recalulation
       return d3.scaleBand()
-        .domain(this.sort ? this.cf.userGroup.top(Infinity).map(d => d.key)
+        .domain(this.sortUsers ? this.cf.userGroup.top(Infinity).map(d => d.key)
           : this.cf.userGroup.top(Infinity).map(d => d.key).sort())
+        .padding(0.1);
+    },
+    gameScale() {
+      // eslint-disable-next-line no-unused-vars
+      const c = this.cf.count; // Used to force recalulation
+      return d3.scaleBand()
+        .domain(this.sortGames ? this.cf.gameGroup.top(Infinity).map(d => d.key)
+          : this.cf.gameGroup.top(Infinity).map(d => d.key).sort())
+        .padding(0.1);
+    },
+    roleScale() {
+      // eslint-disable-next-line no-unused-vars
+      const c = this.cf.count; // Used to force recalulation
+      return d3.scaleBand()
+        .domain(this.cf.roleGroup.top(Infinity).map(d => d.key).sort())
         .padding(0.1);
     },
   },

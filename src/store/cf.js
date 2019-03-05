@@ -29,6 +29,20 @@ const mutations = {
     state.cf.dateGroup = state.cf.dateDim.group(d => d.setHours(0, 0, 0, 0));
     state.cf.hourDim = state.cf.cf.dimension(d => d.ti.getHours() + d.ti.getMinutes() / 60);
     state.cf.hourGroup = state.cf.hourDim.group(Math.floor);
+    state.cf.roleDim = state.cf.cf.dimension((d) => {
+      if (d.r) {
+        return d.r[0];
+      }
+      return 'none';
+    });
+    state.cf.roleGroup = state.cf.roleDim.group();
+    state.cf.gameDim = state.cf.cf.dimension((d) => {
+      if (d.g) {
+        return d.g.t;
+      }
+      return 'none';
+    });
+    state.cf.gameGroup = state.cf.gameDim.group();
     state.cf.count += 1;
   },
   ADD_RECORDS: (state, payload) => {

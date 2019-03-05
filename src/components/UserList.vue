@@ -79,7 +79,7 @@ ul {
   list-style-type: none;
   padding-inline-start: 0;
   margin-block-end: 0;
-  max-height: 40em;
+  max-height: 50em;
   overflow: auto;
   overflow-x: hidden;
 }

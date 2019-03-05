@@ -16,6 +16,10 @@ export default {
             ti: timestamp {
               f: formatted
             }
+            r: role
+            g: game {
+              t: theme
+            }
           }
         }
       }`,
