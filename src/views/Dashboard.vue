@@ -173,13 +173,10 @@ export default {
       return this.$store.getters.CF;
     },
     startDate() {
-      return this.cf.dateDim.bottom(1)[0].ti.setHours(0, 0, 0, 0);
+      return d3.timeDay.floor(this.cf.dateDim.bottom(1)[0].ti);
     },
     endDate() {
-      const d = this.cf.dateDim.top(1)[0].ti;
-      d.setDate(d.getDate() + 1);
-      d.setHours(0, 0, 0, 0);
-      return d;
+      return d3.timeDay.ceil(this.cf.dateDim.top(1)[0].ti);
     },
     dateScale() {
       return d3.scaleTime()
