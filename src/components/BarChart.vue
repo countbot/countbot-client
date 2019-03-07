@@ -21,7 +21,7 @@
           <rect
             v-for="g in gr.all()"
             :key="typeof g.key === (String || Number) ? g.key : g.key._i"
-            :x="x(g.key)"
+            :x="anim ? xVal[g.key] : x(g.key)"
             :y="y(g.value)"
             :height="y(0) - y(g.value)"
             :width="width/gr.all().length*barWidthMult"
@@ -49,6 +49,7 @@
 
 <script>
 import * as d3 from 'd3';
+import { TweenLite } from 'gsap/TweenLite';
 
 export default {
   name: 'BarChart',
@@ -106,12 +107,18 @@ export default {
       type: Boolean,
       default: false,
     },
+    yAxis: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
       activeRange: [0, 1],
       filterArray: [],
       width: null,
+      xVal: null,
+      anim: false,
     };
   },
   computed: {
@@ -150,7 +157,22 @@ export default {
       this.refreshAxes();
     },
     xScale() {
-      d3.select(`#${this.chartId}`).select('.x-axis').call(d3.axisBottom(this.x).ticks(this.ticks));
+      this.anim = true;
+      let l = Object.keys(this.xVal).length - 1;
+      Object.keys(this.xVal).forEach((e) => {
+        TweenLite.to(this.xVal, 1, {
+          [e]: this.x(e),
+          onComplete: () => {
+            if (l) {
+              l -= 1;
+            } else {
+              this.anim = false;
+            }
+          },
+        });
+      });
+      d3.select(`#${this.chartId}`).select('.x-axis').transition().duration(1000)
+        .call(d3.axisBottom(this.x).ticks(this.ticks));
     },
   },
   // created() {
@@ -161,6 +183,11 @@ export default {
     // console.log(this.chart.dimension().top(4));
     this.width = this.$el.clientWidth - this.margin.left - this.margin.right;
     this.activeRange = [0, this.width];
+    const obj = {};
+    this.gr.all().forEach((g) => {
+      obj[g.key] = this.x(g.key);
+    });
+    this.xVal = obj;
     this.$nextTick(() => {
       window.addEventListener('resize', this.refreshChart);
     });
@@ -180,9 +207,11 @@ export default {
       return `translate(${x}, ${y})`;
     },
     refreshAxes() {
-      d3.select(`#${this.chartId}`).select('.y-axis').selectAll('g').remove();
+      if (this.yAxis) {
+        d3.select(`#${this.chartId}`).select('.y-axis').selectAll('g').remove();
+        d3.select(`#${this.chartId}`).select('.y-axis').call(d3.axisLeft(this.y).ticks(4)).call(g => g.select('.domain').remove());
+      }
       d3.select(`#${this.chartId}`).select('.x-axis').selectAll('g').remove();
-      d3.select(`#${this.chartId}`).select('.y-axis').call(d3.axisLeft(this.y).ticks(4)).call(g => g.select('.domain').remove());
       const xAxis = d3.select(`#${this.chartId}`).select('.x-axis').call(d3.axisBottom(this.x).ticks(this.ticks));
       if (this.labelRotate) {
         xAxis.selectAll('text')
@@ -204,6 +233,11 @@ export default {
 
       let extents = this.brushEnabled ? this.activeRange.map(this.x.invert) : null;
       this.width = this.$el.clientWidth - this.margin.left - this.margin.right;
+      const obj = {};
+      this.gr.all().forEach((g) => {
+        obj[g.key] = this.x(g.key);
+      });
+      this.xVal = obj;
       this.refreshAxes();
       if (this.brushEnabled) {
         this.brush.extent([[0, 0], [this.x.range()[1], this.y.range()[0]]]);
@@ -224,7 +258,6 @@ export default {
         extents = extents.map(this.x);
         this.activeRange = extents;
         if (extents[0] === this.x.range()[0] && extents[1] === this.x.range()[1]) {
-          console.log('match');
           br.call(this.brush.move, null);
           br.selectAll('.brush-handle')
             .style('display', 'none');
@@ -253,8 +286,10 @@ export default {
           .attr('dy', '.15em')
           .attr('transform', 'rotate(-65)');
       }
-      d3.select(`#${this.chartId}`).select('.y-axis').selectAll('g').remove();
-      d3.select(`#${this.chartId}`).select('.y-axis').call(d3.axisLeft(this.y).ticks(4)).call(g => g.select('.domain').remove());
+      if (this.yAxis) {
+        d3.select(`#${this.chartId}`).select('.y-axis').selectAll('g').remove();
+        d3.select(`#${this.chartId}`).select('.y-axis').call(d3.axisLeft(this.y).ticks(4)).call(g => g.select('.domain').remove());
+      }
       if (this.brushEnabled) {
         d3.select(`#${this.chartId}`).select('.brush')
           .call(this.brush)

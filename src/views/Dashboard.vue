@@ -24,16 +24,21 @@
     >
       <div class="col-md-9">
         <div class="row">
-          <div class="col-md">
+          <div class="col-lg">
             <BarChart
               chart-id="hour-chart"
               title="Time Of Day"
               dimension="hourDim"
               group="hourGroup"
               :bar-width-mult=".75"
+              :aspect-ratio="$mq | mq({
+                sm: 0.25,
+                md: 0.125,
+                lg: 0.25,
+              })"
             />
           </div>
-          <div class="col-md">
+          <div class="col-lg">
             <BarChart
               chart-id="user-chart"
               title="User"
@@ -43,6 +48,11 @@
               :brush-enabled="false"
               :label-rotate="true"
               :margin="{ top: 10, right: 20, bottom: 80, left: 40 }"
+              :aspect-ratio="$mq | mq({
+                sm: 0.25,
+                md: 0.125,
+                lg: 0.25,
+              })"
             />
           </div>
         </div>
@@ -66,14 +76,18 @@
       <div class="col-md-3 text-center">
         <div class="textfilter">
           <div class="title">
-            Text Filter
+            Text Filter<a
+              class="reset"
+              style="display: none"
+              @click="reset('textDim')"
+            >reset</a>
           </div>
           <div>
             <input
               v-model="queryText"
               type="text"
               name="textFilter"
-              @input="filter(&quot;textDim&quot;)"
+              @input="filter('textDim')"
             >
           </div>
         </div>
@@ -94,6 +108,7 @@ import dataStore from '@/services/dataStore';
 import * as d3 from 'd3';
 import BarChart from '@/components/BarChart.vue';
 import UserList from '@/components/UserList.vue';
+import io from 'socket.io-client';
 
 
 export default {
@@ -106,6 +121,7 @@ export default {
     return {
       queryText: '',
       sort: false,
+      socket: io(process.env.VUE_APP_SERVER_API),
     };
   },
   computed: {
@@ -141,6 +157,15 @@ export default {
     this.$store.dispatch('SET_CF', []);
     this.getMessages(50000, 0);
   },
+  mounted() {
+    this.socket.on('conn', (data) => {
+      console.log(data);
+    });
+    this.socket.on('message', (data) => {
+      // console.log(data);
+      this.addMessage(data);
+    });
+  },
   ready() {
     window.addEventListener('resize', this.handleResize);
   },
@@ -149,7 +174,12 @@ export default {
   },
   methods: {
     filter(dim) {
-      this.$store.dispatch('FILTER', { dim, filter: this.queryText });
+      if (this.queryText === '') {
+        this.reset(dim);
+      } else {
+        d3.select('.textfilter').select('.reset').style('display', null);
+        this.$store.dispatch('FILTER', { dim, filter: this.queryText });
+      }
     },
     // filterRange(dim) {
     //   this.$store.dispatch('FILTER_RANGE', { dim, filter: [this.startDate, this.endDate] });
@@ -171,11 +201,29 @@ export default {
           offset += count;
           this.getMessages(count, offset);
         }
-        // this.$forceUpdate();
-        // console.info(response);
       } catch (e) {
         console.error(e);
       }
+    },
+    async addMessage(id) {
+      try {
+        const response = await dataStore.fetchMessage(id);
+        let { p } = response.data.data;
+        p = p.map((_post) => {
+          const post = Object.assign({}, _post);
+          post.ti = new Date(post.ti.f);
+          return post;
+        });
+        // p.sort((a, b) => a.ti - b.ti);
+        this.$store.dispatch('ADD_RECORDS', p);
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    reset(dim) {
+      this.queryText = '';
+      d3.select('.textfilter').select('.reset').style('display', 'none');
+      this.$store.dispatch('CLEAR_FILTER', { dim });
     },
   },
 };
@@ -183,7 +231,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.textfilter {
+  .textfilter {
     display: inline-block;
     position: relative;
     width: 100%;
@@ -191,6 +239,13 @@ export default {
     overflow: hidden;
     padding-top: 1em;
     padding-bottom: 1em;
-}
+  }
 
+  .reset {
+    padding-left: 1em;
+    font-size: smaller;
+    color: #ccc;
+    cursor: pointer;
+    text-decoration: underline !important;
+  }
 </style>

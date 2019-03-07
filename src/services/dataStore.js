@@ -25,4 +25,25 @@ export default {
       },
     });
   },
+  fetchMessage(id) {
+    return api().post('/graphql', {
+      query: `
+      query($id: String!) {
+        p: Message(id: $id) {
+          i: id
+          te: text
+          p: posted_by {
+            i: id
+            n: name
+          }
+          ti: timestamp {
+            f: formatted
+          }
+        }
+      }`,
+      variables: {
+        id,
+      },
+    });
+  },
 };
