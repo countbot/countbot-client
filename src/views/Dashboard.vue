@@ -151,6 +151,7 @@ import dataStore from '@/services/dataStore';
 import * as d3 from 'd3';
 import BarChart from '@/components/BarChart.vue';
 import UserList from '@/components/UserList.vue';
+import io from 'socket.io-client';
 
 
 export default {
@@ -164,6 +165,7 @@ export default {
       queryText: '',
       sortUsers: false,
       sortGames: false,
+      socket: io(process.env.VUE_APP_SERVER_API),
     };
   },
   computed: {
@@ -214,6 +216,15 @@ export default {
     this.$store.dispatch('SET_CF', []);
     this.getMessages(50000, 0);
   },
+  mounted() {
+    this.socket.on('conn', (data) => {
+      console.log(data);
+    });
+    this.socket.on('message', (data) => {
+      // console.log(data);
+      this.addMessage(data);
+    });
+  },
   ready() {
     window.addEventListener('resize', this.handleResize);
   },
@@ -249,8 +260,21 @@ export default {
           offset += count;
           this.getMessages(count, offset);
         }
-        // this.$forceUpdate();
-        // console.info(response);
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    async addMessage(id) {
+      try {
+        const response = await dataStore.fetchMessage(id);
+        let { p } = response.data.data;
+        p = p.map((_post) => {
+          const post = Object.assign({}, _post);
+          post.ti = new Date(post.ti.f);
+          return post;
+        });
+        // p.sort((a, b) => a.ti - b.ti);
+        this.$store.dispatch('ADD_RECORDS', p);
       } catch (e) {
         console.error(e);
       }
