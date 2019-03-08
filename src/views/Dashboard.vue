@@ -255,7 +255,13 @@ export default {
         this.reset(dim);
       } else {
         d3.select('.textfilter').select('.reset').style('display', null);
-        this.$store.dispatch('FILTER', { dim, filter: this.queryText });
+        try {
+          const re = new RegExp(this.queryText, 'i');
+          this.$store.dispatch('FILTER', { dim, filter: re });
+        } catch (e) {
+          this.$store.dispatch('FILTER', { dim, filter: this.queryText });
+          // console.log(e);
+        }
       }
     },
     // filterRange(dim) {
