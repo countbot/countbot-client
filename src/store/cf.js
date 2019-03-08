@@ -39,7 +39,10 @@ const mutations = {
   FILTER: (state, payload) => {
     // eslint-disable-next-line arrow-body-style
     state.cf[payload.dim].filterFunction((d) => {
-      if (d) return d.toLowerCase().includes(payload.filter.toLowerCase());
+      if (d) {
+        if (payload.filter instanceof RegExp) return payload.filter.test(d);
+        return d.toLowerCase().includes(payload.filter.toLowerCase());
+      }
       if (payload.filter === '') return 1;
       return 0;
     });
