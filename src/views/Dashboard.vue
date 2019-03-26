@@ -188,9 +188,11 @@ export default {
       return this.$store.getters.CF;
     },
     startDate() {
+      const c = this.cf.count; // Used to force recalulation
       return d3.timeDay.floor(this.cf.dateDim.bottom(1)[0].ti);
     },
     endDate() {
+      const c = this.cf.count; // Used to force recalulation
       return d3.timeDay.ceil(this.cf.dateDim.top(1)[0].ti);
     },
     dateScale() {
