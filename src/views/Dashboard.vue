@@ -181,6 +181,7 @@ export default {
       sortUsers: false,
       sortGames: false,
       socket: io(process.env.VUE_APP_SERVER_API),
+      resetDates: 0,
     };
   },
   computed: {
@@ -188,16 +189,15 @@ export default {
       return this.$store.getters.CF;
     },
     startDate() {
-      const c = this.cf.count; // Used to force recalulation
+      const r = this.resetDates;
       return d3.timeDay.floor(this.cf.dateDim.bottom(1)[0].ti);
     },
     endDate() {
-      const c = this.cf.count; // Used to force recalulation
+      const r = this.resetDates;
       return d3.timeDay.ceil(this.cf.dateDim.top(1)[0].ti);
     },
     dateScale() {
       return d3.scaleTime()
-        .transition()
         .domain([this.startDate, this.endDate]);
     },
     dateRound() {
@@ -287,6 +287,7 @@ export default {
           offset += count;
           this.getMessages(count, offset);
         }
+        this.resetDates += 1;
       } catch (e) {
         console.error(e);
       }
@@ -302,6 +303,7 @@ export default {
         });
         // p.sort((a, b) => a.ti - b.ti);
         this.$store.dispatch('ADD_RECORDS', p);
+        this.resetDates += 1;
       } catch (e) {
         console.error(e);
       }
