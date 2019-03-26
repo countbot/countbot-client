@@ -197,6 +197,7 @@ export default {
     },
     dateScale() {
       return d3.scaleTime()
+        .transition()
         .domain([this.startDate, this.endDate]);
     },
     dateRound() {
