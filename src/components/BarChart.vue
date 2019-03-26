@@ -157,20 +157,23 @@ export default {
       this.refreshAxes();
     },
     xScale() {
-      this.anim = true;
-      let l = Object.keys(this.xVal).length - 1;
-      Object.keys(this.xVal).forEach((e) => {
-        TweenLite.to(this.xVal, 1, {
-          [e]: this.x(e),
-          onComplete: () => {
-            if (l) {
-              l -= 1;
-            } else {
-              this.anim = false;
-            }
-          },
+      if(!this.brushEnabled) {
+        this.anim = true;
+        let l = Object.keys(this.xVal).length - 1;
+        Object.keys(this.xVal).forEach((e) => {
+          TweenLite.to(this.xVal, 1, {
+            [e]: this.x(e),
+            onComplete: () => {
+              if (l) {
+                l -= 1;
+              }
+              else {
+                this.anim = false;
+              }
+            },
+          });
         });
-      });
+      }
       d3.select(`#${this.chartId}`).select('.x-axis').transition().duration(1000)
         .call(d3.axisBottom(this.x).ticks(this.ticks));
     },
