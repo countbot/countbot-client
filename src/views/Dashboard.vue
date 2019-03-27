@@ -190,11 +190,11 @@ export default {
     },
     startDate() {
       const r = this.resetDates;
-      return d3.timeDay.floor(this.cf.dateDim.bottom(1)[0].ti);
+      return d3.timeDay.floor(this.cf.dateGroup.all().slice()[0].key);
     },
     endDate() {
       const r = this.resetDates;
-      return d3.timeDay.ceil(this.cf.dateDim.top(1)[0].ti);
+      return d3.timeDay.floor(d3.timeDay.offset(this.cf.dateGroup.all().slice(-1)[0].key,1));
     },
     dateScale() {
       return d3.scaleTime()
