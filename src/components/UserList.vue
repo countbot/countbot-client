@@ -14,7 +14,7 @@
         v-for="u in cf.dateDim.top(100,pageNumber*100)"
         :key="u.key"
       >
-        <span v-if="u.te"><b>{{ u.p.n }}:</b> {{ u.te }}</span>
+        <span v-if="u.t"><b>{{ u.un }}:</b> {{ u.t }}</span>
       </li>
     </ul>
     <div class="small">

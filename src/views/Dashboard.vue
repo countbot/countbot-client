@@ -74,6 +74,7 @@
               group="userGroup"
               :x-scale="userScale"
               :brush-enabled="false"
+              :active="active"
               :label-rotate="true"
               :margin="{ top: 10, right: 20, bottom: 80, left: 40 }"
               :aspect-ratio="$mq | mq({
@@ -93,6 +94,7 @@
               group="gameGroup"
               :x-scale="gameScale"
               :brush-enabled="false"
+              :active="active"
               :label-rotate="true"
               :margin="{ top: 10, right: 20, bottom: 80, left: 40 }"
               :aspect-ratio="$mq | mq({
@@ -110,6 +112,7 @@
               group="roleGroup"
               :x-scale="roleScale"
               :brush-enabled="false"
+              :active="active"
               :label-rotate="true"
               :margin="{ top: 10, right: 20, bottom: 80, left: 40 }"
               :aspect-ratio="$mq | mq({
@@ -162,12 +165,11 @@
 </template>
 
 <script>
-import dataStore from '@/services/dataStore';
+// import dataStore from '@/services/dataStore';
 import * as d3 from 'd3';
 import BarChart from '@/components/BarChart.vue';
 import UserList from '@/components/UserList.vue';
 import io from 'socket.io-client';
-
 
 export default {
   name: 'Dashboard',
@@ -178,10 +180,12 @@ export default {
   data() {
     return {
       queryText: '',
-      sortUsers: false,
-      sortGames: false,
+      sortUsers: true,
+      sortGames: true,
       socket: io(process.env.VUE_APP_SERVER_API),
       resetDates: 0,
+      after: null,
+      active: false,
     };
   },
   computed: {
@@ -221,7 +225,7 @@ export default {
     },
     roleScale() {
       // eslint-disable-next-line no-unused-vars
-      const c = this.cf.count; // Used to force recalulation
+      const r = this.resetDates; // Used to force recalulation
       return d3.scaleBand()
         .domain(this.cf.roleGroup.top(Infinity).map(d => d.key).sort())
         .padding(0.1);
@@ -229,13 +233,13 @@ export default {
     charCount() {
       // eslint-disable-next-line no-unused-vars
       const c = this.cf.count; // Used to force recalulation
-      return Math.round(this.cf.cf.allFiltered().map(d => (d.te ? d.te.length : 0))
+      return Math.round(this.cf.cf.allFiltered().map(d => (d.t ? d.t.length : 0))
         .reduce((acc, curr) => acc + curr, 0) / this.cf.cf.groupAll().value());
     },
   },
   created() {
     this.$store.dispatch('SET_CF', []);
-    this.getMessages(50000, 0);
+    this.getMessages();
   },
   mounted() {
     this.socket.on('conn', (data) => {
@@ -267,46 +271,80 @@ export default {
         }
       }
     },
-    // filterRange(dim) {
-    //   this.$store.dispatch('FILTER_RANGE', { dim, filter: [this.startDate, this.endDate] });
-    // },
-    async getMessages(c, o) {
-      const count = c;
-      let offset = o;
-      try {
-        const response = await dataStore.fetchMessages(count, offset);
-        let { p } = response.data.data.Group[0];
-        p = p.map((_post) => {
-          const post = Object.assign({}, _post);
-          post.ti = new Date(post.ti.f);
-          return post;
-        });
-        // p.sort((a, b) => a.ti - b.ti);
-        this.$store.dispatch('ADD_RECORDS', p);
-        if (p.length === count) {
-          offset += count;
-          this.getMessages(count, offset);
-        }
-        this.resetDates += 1;
-      } catch (e) {
-        console.error(e);
-      }
+    getMessages() {
+      const v = this;
+      fetch(`${process.env.VUE_APP_SERVER_API}/messages?after=`)
+        .then((response) => {
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let partialObjs = '';
+          function go() {
+            return reader.read().then((result) => {
+              partialObjs += decoder.decode(result.value);
+              const bound = /(?<=})(?={)/;
+              let objs = partialObjs.split(bound);
+              // console.info(objs);
+              if (!result.done) {
+                // Last cell is likely incomplete
+                // Keep hold of it for next time
+                partialObjs = objs[objs.length - 1];
+                // Remove it from our complete cells
+                objs = objs.slice(0, -1);
+              }
+              objs = objs.map((o) => {
+                o = JSON.parse(o);
+                o.ti = new Date(o.ti);
+                return o;
+              });
+              v.$store.dispatch('ADD_RECORDS', objs);
+              v.resetDates += 1;
+              if (result.done) {
+                reader.cancel("Done");
+                return;
+              }
+              return go();
+            });
+          }
+          return go();
+        })
+        .then(result => v.active = true);
     },
-    async addMessage(id) {
-      try {
-        const response = await dataStore.fetchMessage(id);
-        let { p } = response.data.data;
-        p = p.map((_post) => {
-          const post = Object.assign({}, _post);
-          post.ti = new Date(post.ti.f);
-          return post;
+    addMessage(id) {
+      const v = this;
+      fetch(`${process.env.VUE_APP_SERVER_API}/message?id=${id}`)
+        .then((response) => {
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let partialObjs = '';
+          function go() {
+            return reader.read().then((result) => {
+              partialObjs += decoder.decode(result.value);
+              const bound = /(?<=})(?={)/;
+              let objs = partialObjs.split(bound);
+              console.info(objs);
+              if (!result.done) {
+                // Last cell is likely incomplete
+                // Keep hold of it for next time
+                partialObjs = objs[objs.length - 1];
+                // Remove it from our complete cells
+                objs = objs.slice(0, -1);
+              }
+              objs = objs.map((o) => {
+                o = JSON.parse(o);
+                o.ti = new Date(o.ti);
+                return o;
+              });
+              v.$store.dispatch('ADD_RECORDS', objs);
+              v.resetDates += 1;
+              if (result.done) {
+                reader.cancel("Done");
+                return;
+              }
+              return go();
+            });
+          }
+          return go();
         });
-        // p.sort((a, b) => a.ti - b.ti);
-        this.$store.dispatch('ADD_RECORDS', p);
-        this.resetDates += 1;
-      } catch (e) {
-        console.error(e);
-      }
     },
     reset(dim) {
       this.queryText = '';

@@ -23,9 +23,9 @@ const getters = {
 const mutations = {
   SET_CF: (state, payload) => {
     state.cf.cf = crossfilter(payload);
-    state.cf.userDim = state.cf.cf.dimension(d => d.p.n);
+    state.cf.userDim = state.cf.cf.dimension(d => d.un);
     state.cf.userGroup = state.cf.userDim.group();
-    state.cf.textDim = state.cf.cf.dimension(d => d.te);
+    state.cf.textDim = state.cf.cf.dimension(d => d.t);
     state.cf.dateDim = state.cf.cf.dimension(d => d.ti);
     state.cf.dateGroup = state.cf.dateDim.group(d => d3.timeDay(d));
     state.cf.hourDim = state.cf.cf.dimension(d => d.ti.getHours() + d.ti.getMinutes() / 60);
@@ -38,8 +38,8 @@ const mutations = {
     });
     state.cf.roleGroup = state.cf.roleDim.group();
     state.cf.gameDim = state.cf.cf.dimension((d) => {
-      if (d.g) {
-        return d.g.t;
+      if (d.th) {
+        return d.th;
       }
       return 'none';
     });

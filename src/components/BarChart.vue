@@ -103,6 +103,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    active: {
+      type: Boolean,
+      default: true,
+    },
     labelRotate: {
       type: Boolean,
       default: false,
@@ -157,7 +161,7 @@ export default {
       this.refreshAxes();
     },
     xScale() {
-      if(!this.brushEnabled) {
+      if(!this.brushEnabled && this.active) {
         this.anim = true;
         let l = Object.keys(this.xVal).length - 1;
         Object.keys(this.xVal).forEach((e) => {
