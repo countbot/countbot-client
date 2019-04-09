@@ -2,33 +2,30 @@
 
 <template>
   <div class="list">
-    <!--<div class='title'>{{ title }}
-      <a href='#' class='reset' style='display: none' @click='reset'>reset</a>-->
-    <!--</div>-->
     <ul
       id="mList"
       :key="cf.count"
       class="scrollbar"
     >
       <li
-        v-for="u in cf.dateDim.top(100,pageNumber*100)"
+        v-for="u in cf.dateDim.top(postNumber)"
         :key="u.key"
+        @click="toggleExpanded(u)"
       >
         <span v-if="u.t"><b>{{ u.un }}:</b> {{ u.t }}</span>
+        <div v-if="u.exp">
+          <span><b>Timestamp:</b> {{ u.ti.toString().substring(0, u.ti.toString().indexOf(' GMT')) }}</span>
+        </div>
       </li>
     </ul>
     <div class="small">
-      {{ pageNumber*100+1 }} to {{ (pageNumber+1)*100 }} of {{ cf.cf.groupAll().value() }}
+      1 to {{ postNumber }} of {{ cf.cf.groupAll().value() }}
     </div>
-    <div>
+    <div v-if="postNumber > 100 || scrollPos > 0">
       <a
         class="pagebutton"
-        @click="prevPage"
-      >prev</a> /
-      <a
-        class="pagebutton"
-        @click="nextPage"
-      >next</a>
+        @click="toTop"
+      >go to top</a>
     </div>
   </div>
 </template>
@@ -45,6 +42,8 @@ export default {
   data() {
     return {
       pageNumber: 0,
+      scrollPos: 0,
+      postNumber: 100,
     };
   },
   computed: {
@@ -52,17 +51,41 @@ export default {
       return this.$store.getters.CF;
     },
   },
+  beforeUpdate() {
+    const myDiv = document.getElementById('mList');
+    this.scrollPos = myDiv.scrollTop;
+    if (this.scrollPos === 0) {
+      this.postNumber = 100;
+    }
+  },
+  updated() {
+    const myDiv = document.getElementById('mList');
+    myDiv.scrollTop = this.scrollPos;
+    myDiv.onscroll = () => {
+      this.scroll();
+    };
+  },
   methods: {
-    nextPage() {
-      this.pageNumber += 1;
+    scroll() {
       const myDiv = document.getElementById('mList');
-      myDiv.scrollTop = 0;
+      const { scrollTop, scrollHeight, offsetHeight } = myDiv;
+      if (scrollTop + offsetHeight >= scrollHeight
+        && this.cf.cf.groupAll().value() > this.postNumber) {
+        this.postNumber += 100;
+      }
     },
-    prevPage() {
-      if (this.pageNumber === 0) return;
-      this.pageNumber -= 1;
+    toTop() {
       const myDiv = document.getElementById('mList');
       myDiv.scrollTop = 0;
+      this.postNumber = 100;
+    },
+    toggleExpanded(u) {
+      if (u.exp) {
+        u.exp = !u.exp;
+      } else {
+        u.exp = true;
+      }
+      this.$forceUpdate();
     },
   },
 };
@@ -88,6 +111,7 @@ li {
   background: #393f46;
   margin-bottom: 1px;
   font-size: .75em;
+  cursor: pointer;
 }
 
 .pagebutton {

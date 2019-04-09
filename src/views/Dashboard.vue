@@ -321,7 +321,7 @@ export default {
               partialObjs += decoder.decode(result.value);
               const bound = /(?<=})(?={)/;
               let objs = partialObjs.split(bound);
-              console.info(objs);
+              // console.info(objs);
               if (!result.done) {
                 // Last cell is likely incomplete
                 // Keep hold of it for next time
@@ -337,7 +337,7 @@ export default {
               v.$store.dispatch('ADD_RECORDS', objs);
               v.resetDates += 1;
               if (result.done) {
-                reader.cancel("Done");
+                reader.cancel('Done');
                 return;
               }
               return go();
@@ -373,6 +373,10 @@ export default {
     color: #ccc;
     cursor: pointer;
     text-decoration: underline !important;
+  }
+  
+  p {
+    margin-bottom: 0rem;
   }
 
 @keyframes blink {
