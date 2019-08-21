@@ -319,7 +319,7 @@ export default {
           function go() {
             return reader.read().then((result) => {
               partialObjs += decoder.decode(result.value);
-              const bound = /(?<=})(?={)/;
+              const bound = /,(?={)/;
               let objs = partialObjs.split(bound);
               // console.info(objs);
               if (!result.done) {
