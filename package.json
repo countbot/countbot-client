@@ -11,7 +11,7 @@
   "author": "Stephan Dober",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "crossfilter2": "^1.4.6",
     "d3": "^5.9.1",
     "gsap": "^2.1.2",
